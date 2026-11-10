@@ -36,6 +36,7 @@ type ImportOccurrence = {
   isTypeOnly: boolean;
 };
 
+/** Counts source lines without treating a trailing newline as an extra line. */
 function countLines(content: string): number {
   if (content.length === 0) {
     return 0;
@@ -50,12 +51,18 @@ function countLines(content: string): number {
   return lines.length;
 }
 
+/** Removes a known source extension while preserving the repository path. */
 function moduleId(relativePath: string, extension: string): string {
   return extension
     ? relativePath.slice(0, relativePath.length - extension.length)
     : relativePath;
 }
 
+/**
+ * Collects statically recoverable dependencies without resolving them.
+ * CommonJS requires and import-equals declarations use the import kind so
+ * downstream coverage and edge handling stay within the parser contract.
+ */
 function collectOccurrences(sourceFile: MorphSourceFile): ImportOccurrence[] {
   const occurrences: ImportOccurrence[] = [];
 
@@ -92,11 +99,28 @@ function collectOccurrences(sourceFile: MorphSourceFile): ImportOccurrence[] {
   for (const call of sourceFile.getDescendantsOfKind(
     SyntaxKind.CallExpression,
   )) {
-    if (call.getExpression().getKind() !== SyntaxKind.ImportKeyword) {
+    const expression = call.getExpression();
+    const argument = call.getArguments()[0];
+
+    if (
+      Node.isIdentifier(expression) &&
+      expression.getText() === "require" &&
+      call.getArguments().length === 1 &&
+      argument &&
+      Node.isStringLiteral(argument)
+    ) {
+      occurrences.push({
+        from: "",
+        specifier: argument.getLiteralValue(),
+        kind: "import",
+        isTypeOnly: false,
+      });
       continue;
     }
 
-    const argument = call.getArguments()[0];
+    if (expression.getKind() !== SyntaxKind.ImportKeyword) {
+      continue;
+    }
 
     if (!argument) {
       continue;
@@ -118,6 +142,29 @@ function collectOccurrences(sourceFile: MorphSourceFile): ImportOccurrence[] {
       from: "",
       specifier,
       kind: "dynamic",
+      isTypeOnly: false,
+    });
+  }
+
+  for (const declaration of sourceFile.getDescendantsOfKind(
+    SyntaxKind.ImportEqualsDeclaration,
+  )) {
+    const moduleReference = declaration.getModuleReference();
+
+    if (!Node.isExternalModuleReference(moduleReference)) {
+      continue;
+    }
+
+    const expression = moduleReference.getExpression();
+
+    if (!Node.isStringLiteral(expression)) {
+      continue;
+    }
+
+    occurrences.push({
+      from: "",
+      specifier: expression.getLiteralValue(),
+      kind: "import",
       isTypeOnly: false,
     });
   }

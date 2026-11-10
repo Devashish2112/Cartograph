@@ -12,9 +12,10 @@ import { useCallback, useEffect } from "react";
 import type { GraphNode } from "@/lib/graph/model";
 import {
   PANEL_HEADER_HEIGHT,
+  PANEL_BORDER,
   PANEL_ROW_HEIGHT,
   panelHeight,
-  visibleFiles,
+  scrollableFiles,
 } from "@/lib/graph/panel";
 
 export type ModulePanelData = {
@@ -41,7 +42,7 @@ export function ModulePanel({
   id,
   data,
 }: NodeProps<ModulePanelType>) {
-  const visible = visibleFiles(data.node);
+  const visible = scrollableFiles(data.node);
   const updateNodeInternals = useUpdateNodeInternals();
   const nodeId = data.node.id;
   const onVisibleFilesChange = data.onVisibleFilesChange;
@@ -108,7 +109,10 @@ export function ModulePanel({
         data-panel-scroll={id}
         className="overflow-x-hidden overflow-y-auto"
         style={{
-          height: panelHeight(data.node.files.length) - PANEL_HEADER_HEIGHT - 2,
+          height:
+            panelHeight(data.node.files.length) -
+            PANEL_HEADER_HEIGHT -
+            PANEL_BORDER,
         }}
         onScroll={(event) => {
           reportVisibleFiles(event.currentTarget);

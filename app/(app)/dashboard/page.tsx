@@ -112,7 +112,7 @@ async function DashboardContent() {
               <span>Repository</span>
               <span>State</span>
               <span>Commit</span>
-              <span className="text-right">Started</span>
+              <span className="text-right">Created</span>
             </div>
 
             <ul className="divide-y divide-border">

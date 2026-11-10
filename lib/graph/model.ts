@@ -1,5 +1,6 @@
 import type { ParseResult, ParsedFile } from "../parser/types";
 import { foldDirectories, type FolderGroup } from "./fold";
+import { PANEL_MAX_ROWS, panelHeight } from "./panel";
 
 export type FileCategory = {
   id: string;
@@ -93,11 +94,6 @@ const PANEL_MIN_WIDTH = 250;
 const PANEL_MAX_WIDTH = 320;
 const MIN_NODE_HEIGHT = 36;
 const MAX_NODE_HEIGHT = 96;
-export const PANEL_MAX_ROWS = 12;
-export const PANEL_HEADER_HEIGHT = 44;
-export const PANEL_ROW_HEIGHT = 22;
-const PANEL_BORDER = 2;
-
 function categoryFor(extension: string): CategoryDefinition {
   for (const definition of CATEGORY_DEFINITIONS) {
     if (definition.extensions.has(extension)) {
@@ -206,14 +202,6 @@ function panelWidth(label: string): number {
   return Math.max(
     PANEL_MIN_WIDTH,
     Math.min(PANEL_MAX_WIDTH, labelWidth(label)),
-  );
-}
-
-function panelHeight(fileCount: number): number {
-  return (
-    PANEL_HEADER_HEIGHT +
-    Math.min(fileCount, PANEL_MAX_ROWS) * PANEL_ROW_HEIGHT +
-    PANEL_BORDER
   );
 }
 

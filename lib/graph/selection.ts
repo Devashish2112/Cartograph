@@ -11,14 +11,20 @@ export type Highlight = {
   edgeKeys: Set<string>;
 };
 
+/**
+ * Creates a printable identity for one parser edge. Parser edges are already
+ * deduplicated by all five identity fields before this value is used.
+ */
 export function edgeKey(edge: Edge): string {
-  return [
-    edge.from,
-    edge.to,
-    edge.kind,
-    edge.specifier,
-    edge.isTypeOnly ? "type" : "value",
-  ].join("\u0000");
+  return `edge-${encodeURIComponent(
+    JSON.stringify([
+      edge.from,
+      edge.to,
+      edge.kind,
+      edge.specifier,
+      edge.isTypeOnly,
+    ]),
+  )}`;
 }
 
 /**

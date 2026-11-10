@@ -175,7 +175,7 @@ values
     'org_3LsLjhcJPo8zRrzRDO66MoZY4od',
     'a2000000-0000-4000-8000-000000000001',
     'src/index.ts', 'src', '.ts', 'typescript', 42,
-    'b1d3f5a7c9e1b4d6f8a0c2e5b7d9f1a3', true, null, 0, 1
+    'b1d3f5a7c9e1b4d6f8a0c2e5b7d9f1a3', true, null, 1, 1
   ),
   (
     'a3000000-0000-4000-8000-000000000002',
@@ -386,16 +386,6 @@ values
       'a3000000-0000-4000-8000-000000000002'
     ]::uuid[],
     10
-  ),
-  (
-    'a8000000-0000-4000-8000-000000000002',
-    'org_3LsLjhcJPo8zRrzRDO66MoZY4od',
-    'a2000000-0000-4000-8000-000000000001',
-    'unimported',
-    'Files nothing imports',
-    'src/index.ts is reached by the framework rather than by an import.',
-    array['a3000000-0000-4000-8000-000000000001']::uuid[],
-    0
   ),
   (
     'b8000000-0000-4000-8000-000000000001',
