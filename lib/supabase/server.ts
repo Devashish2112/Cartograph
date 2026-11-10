@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
 
 import { env } from "@/lib/env";
+import type { Database } from "@/lib/supabase/database.types";
 
 /**
  * The Clerk session token is the only credential Supabase sees. Passing it as
@@ -12,7 +13,7 @@ import { env } from "@/lib/env";
 export async function createSupabaseServerClient() {
   const { getToken } = await auth();
 
-  return createClient(env.supabaseUrl, env.supabasePublishableKey, {
+  return createClient<Database>(env.supabaseUrl, env.supabasePublishableKey, {
     accessToken: async () => (await getToken()) ?? null,
     // Clerk owns the session. Supabase must not persist or refresh one of its
     // own alongside it.
