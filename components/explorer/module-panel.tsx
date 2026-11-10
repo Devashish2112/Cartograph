@@ -12,9 +12,10 @@ import { useCallback, useEffect } from "react";
 import type { GraphNode } from "@/lib/graph/model";
 import {
   PANEL_HEADER_HEIGHT,
+  PANEL_BORDER,
   PANEL_ROW_HEIGHT,
   panelHeight,
-  visibleFiles,
+  scrollableFiles,
 } from "@/lib/graph/panel";
 
 export type ModulePanelData = {
@@ -27,6 +28,8 @@ export type ModulePanelData = {
   onClose: (nodeId: string) => void;
   onSelectFile: (nodeId: string, filePath: string) => void;
   onVisibleFilesChange: (nodeId: string, paths: ReadonlySet<string>) => void;
+  onHoverNode: (nodeId: string | null) => void;
+  onHoverFile: (path: string | null) => void;
 };
 
 export type ModulePanelType = Node<ModulePanelData, "modulePanel">;
@@ -39,7 +42,7 @@ export function ModulePanel({
   id,
   data,
 }: NodeProps<ModulePanelType>) {
-  const visible = visibleFiles(data.node);
+  const visible = scrollableFiles(data.node);
   const updateNodeInternals = useUpdateNodeInternals();
   const nodeId = data.node.id;
   const onVisibleFilesChange = data.onVisibleFilesChange;
@@ -76,6 +79,8 @@ export function ModulePanel({
 
   return (
     <div
+      onMouseEnter={() => data.onHoverNode(nodeId)}
+      onMouseLeave={() => data.onHoverNode(null)}
       className={`relative overflow-hidden rounded border bg-surface ${
         data.selected ? "border-accent" : "border-border-strong"
       } ${data.dimmed ? "opacity-25" : "opacity-100"}`}
@@ -104,7 +109,10 @@ export function ModulePanel({
         data-panel-scroll={id}
         className="overflow-x-hidden overflow-y-auto"
         style={{
-          height: panelHeight(data.node.files.length) - PANEL_HEADER_HEIGHT - 2,
+          height:
+            panelHeight(data.node.files.length) -
+            PANEL_HEADER_HEIGHT -
+            PANEL_BORDER,
         }}
         onScroll={(event) => {
           reportVisibleFiles(event.currentTarget);
@@ -124,6 +132,8 @@ export function ModulePanel({
                   event.stopPropagation();
                   data.onSelectFile(data.node.id, file.path);
                 }}
+                onMouseEnter={() => data.onHoverFile(file.path)}
+                onMouseLeave={() => data.onHoverFile(null)}
                 className={`flex w-full items-center gap-2 border-b border-border/60 px-2.5 text-left font-mono text-[10px] ${
                   selected
                     ? "bg-accent/10 text-accent"

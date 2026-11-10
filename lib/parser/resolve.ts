@@ -18,6 +18,14 @@ const SOURCE_EXTENSIONS = [
   ".cjs",
 ];
 
+const SOURCE_STEM_SUBSTITUTIONS: ReadonlyMap<string, readonly string[]> =
+  new Map([
+    [".js", [".ts", ".tsx"]],
+    [".jsx", [".tsx"]],
+    [".mjs", [".mts"]],
+    [".cjs", [".cts"]],
+  ]);
+
 const OTHER_EXTENSIONS = [
   ".json",
   ".css",
@@ -347,6 +355,10 @@ export class ModuleResolver {
     return this.findExistingFileAt(base);
   }
 
+  /**
+   * Checks a direct path, then only the documented JavaScript-to-TypeScript
+   * stem substitutions, or extension and index variants for extensionless paths.
+   */
   private findExistingFileAt(base: string): string | null {
     const candidates = new Set<string>();
     candidates.add(base);
@@ -355,7 +367,8 @@ export class ModuleResolver {
 
     if (extension) {
       const stem = base.slice(0, -extension.length);
-      for (const sourceExtension of SOURCE_EXTENSIONS) {
+      for (const sourceExtension of SOURCE_STEM_SUBSTITUTIONS.get(extension) ??
+        []) {
         candidates.add(`${stem}${sourceExtension}`);
       }
     } else {

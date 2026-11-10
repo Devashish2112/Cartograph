@@ -8,13 +8,16 @@ export type ModuleNodeData = {
   fanIn: number;
   selected: boolean;
   dimmed: boolean;
+  onHoverNode: (nodeId: string | null) => void;
 };
 
 export type ModuleNodeType = Node<ModuleNodeData, "module">;
 
-export function ModuleNode({ data }: NodeProps<ModuleNodeType>) {
+export function ModuleNode({ id, data }: NodeProps<ModuleNodeType>) {
   return (
     <div
+      onMouseEnter={() => data.onHoverNode(id)}
+      onMouseLeave={() => data.onHoverNode(null)}
       className={`relative flex h-full w-full items-center justify-center rounded border bg-surface px-2 text-center font-mono text-[11px] leading-tight ${
         data.selected
           ? "border-accent text-foreground"

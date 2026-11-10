@@ -167,11 +167,22 @@ create index analyses_organization_created_idx
   on public.analyses (organization_id, created_at desc);
 create index analyses_project_idx on public.analyses (project_id);
 create index files_analysis_idx on public.files (analysis_id);
+create index files_organization_idx on public.files (organization_id);
 create index edges_analysis_idx on public.edges (analysis_id);
+create index edges_organization_idx on public.edges (organization_id);
+create index edges_from_file_idx on public.edges (from_file_id);
+create index edges_to_file_idx on public.edges (to_file_id);
 create index routes_analysis_idx on public.routes (analysis_id);
+create index routes_organization_idx on public.routes (organization_id);
+create index routes_file_idx on public.routes (file_id);
 create index explanations_analysis_idx on public.explanations (analysis_id);
+create index explanations_organization_idx on public.explanations (organization_id);
+create index explanations_file_idx on public.explanations (file_id);
 create index file_roles_analysis_idx on public.file_roles (analysis_id);
+create index file_roles_organization_idx on public.file_roles (organization_id);
+create index file_roles_file_idx on public.file_roles (file_id);
 create index insights_analysis_idx on public.insights (analysis_id);
+create index insights_organization_idx on public.insights (organization_id);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -222,53 +233,44 @@ alter table public.explanations enable row level security;
 alter table public.file_roles enable row level security;
 alter table public.insights enable row level security;
 
-create policy "organization members access their organization"
-  on public.organizations for all to authenticated
-  using (id = public.current_organization_id())
-  with check (id = public.current_organization_id());
+create policy "organization members read their organization"
+  on public.organizations for select to authenticated
+  using (id = public.current_organization_id());
 
-create policy "organization members access projects"
-  on public.projects for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read projects"
+  on public.projects for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access analyses"
-  on public.analyses for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read analyses"
+  on public.analyses for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access files"
-  on public.files for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read files"
+  on public.files for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access edges"
-  on public.edges for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read edges"
+  on public.edges for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access routes"
-  on public.routes for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read routes"
+  on public.routes for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access explanations"
-  on public.explanations for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read explanations"
+  on public.explanations for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access file roles"
-  on public.file_roles for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read file roles"
+  on public.file_roles for select to authenticated
+  using (organization_id = public.current_organization_id());
 
-create policy "organization members access insights"
-  on public.insights for all to authenticated
-  using (organization_id = public.current_organization_id())
-  with check (organization_id = public.current_organization_id());
+create policy "organization members read insights"
+  on public.insights for select to authenticated
+  using (organization_id = public.current_organization_id());
 
 grant usage on schema public to authenticated;
-grant select, insert, update, delete on
+grant select on
   public.organizations,
   public.projects,
   public.analyses,

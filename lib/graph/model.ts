@@ -1,5 +1,6 @@
 import type { ParseResult, ParsedFile } from "../parser/types";
 import { foldDirectories, type FolderGroup } from "./fold";
+import { PANEL_MAX_ROWS, panelHeight } from "./panel";
 
 export type FileCategory = {
   id: string;
@@ -11,6 +12,7 @@ export type FileCategory = {
 export type GraphFile = {
   path: string;
   label: string;
+  lineCount: number;
   categoryId: string;
   categoryColor: string;
   fanIn: number;
@@ -92,11 +94,6 @@ const PANEL_MIN_WIDTH = 250;
 const PANEL_MAX_WIDTH = 320;
 const MIN_NODE_HEIGHT = 36;
 const MAX_NODE_HEIGHT = 96;
-export const PANEL_MAX_ROWS = 12;
-export const PANEL_HEADER_HEIGHT = 44;
-export const PANEL_ROW_HEIGHT = 22;
-const PANEL_BORDER = 2;
-
 function categoryFor(extension: string): CategoryDefinition {
   for (const definition of CATEGORY_DEFINITIONS) {
     if (definition.extensions.has(extension)) {
@@ -208,14 +205,6 @@ function panelWidth(label: string): number {
   );
 }
 
-function panelHeight(fileCount: number): number {
-  return (
-    PANEL_HEADER_HEIGHT +
-    Math.min(fileCount, PANEL_MAX_ROWS) * PANEL_ROW_HEIGHT +
-    PANEL_BORDER
-  );
-}
-
 function relativeLabel(path: string, directory: string): string {
   if (directory === ".") {
     return path;
@@ -280,6 +269,7 @@ export function buildExplorerModel(
         return {
           path: file.path,
           label: relativeLabel(file.path, group.id),
+          lineCount: file.lineCount,
           categoryId: category?.id ?? FALLBACK_CATEGORY.id,
           categoryColor: category?.color ?? FALLBACK_CATEGORY.color,
           fanIn: file.fanIn,
