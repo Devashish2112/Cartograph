@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 
 :root,
 [data-theme="light"] {
@@ -17,6 +18,14 @@
   --incoming: #16a34a;
   --outgoing: #d97706;
   --danger: #dc2626;
+  --category-1: #7c3aed;
+  --category-2: #0891b2;
+  --category-3: #db2777;
+  --category-4: #ca8a04;
+  --category-5: #64748b;
+  --edge: #64748b;
+  --edge-dim: #94a3b8;
+  --map-grid: #d4d4d8;
 }
 
 /* No stored choice and no JavaScript: follow the system. */
@@ -37,6 +46,14 @@
     --incoming: #4ade80;
     --outgoing: #fbbf24;
     --danger: #f87171;
+    --category-1: #a78bfa;
+    --category-2: #22d3ee;
+    --category-3: #f472b6;
+    --category-4: #facc15;
+    --category-5: #94a3b8;
+    --edge: #71717a;
+    --edge-dim: #3f3f46;
+    --map-grid: #27272a;
   }
 }
 
@@ -56,6 +73,14 @@
   --incoming: #4ade80;
   --outgoing: #fbbf24;
   --danger: #f87171;
+  --category-1: #a78bfa;
+  --category-2: #22d3ee;
+  --category-3: #f472b6;
+  --category-4: #facc15;
+  --category-5: #94a3b8;
+  --edge: #71717a;
+  --edge-dim: #3f3f46;
+  --map-grid: #27272a;
 }
 
 @theme inline {
@@ -84,4 +109,21 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+.dependency-map .react-flow__controls {
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.dependency-map .react-flow__controls-button {
+  width: 26px;
+  height: 26px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  fill: var(--muted);
+}
+
+.dependency-map .react-flow__controls-button:last-child {
+  border-bottom: 0;
 }
