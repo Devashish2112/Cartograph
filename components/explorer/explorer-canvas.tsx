@@ -18,7 +18,7 @@ import {
   useState,
 } from "react";
 
-import { CategoryRail } from "./category-rail";
+import { InteractiveCategoryRail } from "./category-rail";
 import { ModuleNode, type ModuleNodeType } from "./module-node";
 import { ModulePanel, type ModulePanelType } from "./module-panel";
 import { ExplorerShell } from "./explorer-shell";
@@ -27,6 +27,7 @@ import { parsedRepository } from "@/lib/explorer/preview-data";
 import { layoutGraph } from "@/lib/graph/layout";
 import { buildExplorerModel, visibleFiles } from "@/lib/graph/model";
 import { edgeKey, computeHighlight, type Selection } from "@/lib/graph/selection";
+import { buildInsights } from "@/lib/graph/analysis";
 import {
   handleForFile,
 } from "@/lib/graph/panel";
@@ -96,12 +97,26 @@ function ExplorerCanvasInner() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [visibleFilesByNode, setVisibleFilesByNode] = useState<
     ReadonlyMap<string, ReadonlySet<string>>
   >(() => new Map());
   const model = useMemo(
     () => buildExplorerModel(parsedRepository, expandedIds),
     [expandedIds],
+  );
+  const insights = useMemo(() => buildInsights(parsedRepository), []);
+  const categoryPaths = useMemo(
+    () =>
+      new Set(
+        parsedRepository.files
+          .filter(
+            (file) =>
+              model.fileByPath.get(file.path)?.categoryId === activeCategoryId,
+          )
+          .map((file) => file.path),
+      ),
+    [activeCategoryId, model.fileByPath],
   );
   const highlight = useMemo(
     () => {
@@ -113,13 +128,46 @@ function ExplorerCanvasInner() {
               : null;
           })()
         : null;
-      return computeHighlight(
+      const selectionHighlight = computeHighlight(
         model,
         parsedRepository.edges,
         hoverSelection ?? selection,
       );
+      if (!activeCategoryId) {
+        return selectionHighlight;
+      }
+
+      const nodeIds = new Set<string>();
+      const filePaths = new Set(categoryPaths);
+      const edgeKeys = new Set<string>();
+      for (const node of model.nodes) {
+        if (node.files.some((file) => categoryPaths.has(file.path))) {
+          nodeIds.add(node.id);
+        }
+      }
+      for (const edge of parsedRepository.edges) {
+        if (categoryPaths.has(edge.from) || categoryPaths.has(edge.to)) {
+          edgeKeys.add(edgeKey(edge));
+        }
+      }
+      if (!selectionHighlight) {
+        return { nodeIds, filePaths, edgeKeys };
+      }
+      return {
+        nodeIds: new Set(
+          [...selectionHighlight.nodeIds].filter((id) => nodeIds.has(id)),
+        ),
+        filePaths: new Set(
+          [...selectionHighlight.filePaths].filter((path) =>
+            filePaths.has(path),
+          ),
+        ),
+        edgeKeys: new Set(
+          [...selectionHighlight.edgeKeys].filter((key) => edgeKeys.has(key)),
+        ),
+      };
     },
-    [hoveredPath, model, selection],
+    [activeCategoryId, categoryPaths, hoveredPath, model, selection],
   );
   const positions = useMemo(
     () => layoutGraph(model.nodes, model.nodeEdges),
@@ -196,6 +244,7 @@ function ExplorerCanvasInner() {
           selected: isSelected,
           dimmed: isDimmed,
           activeFiles: highlight?.filePaths ?? null,
+          activeCategoryId,
           selectedFile:
             selection?.kind === "file" && selection.nodeId === node.id
               ? selection.path
@@ -245,6 +294,7 @@ function ExplorerCanvasInner() {
     reportVisibleFiles,
     selectFile,
     selection,
+    activeCategoryId,
     setHoveredNodeId,
     setHoveredPath,
   ]);
@@ -352,7 +402,13 @@ function ExplorerCanvasInner() {
 
   return (
     <ExplorerShell
-      rail={<CategoryRail categories={model.categories} />}
+      rail={
+        <InteractiveCategoryRail
+          categories={model.categories}
+          activeCategoryId={activeCategoryId}
+          onSelect={setActiveCategoryId}
+        />
+      }
       map={
         <MapViewport
           nodes={nodes}
@@ -376,6 +432,7 @@ function ExplorerCanvasInner() {
             }
           }}
           onHoverPath={setHoveredPath}
+          insights={insights}
         />
       }
     />

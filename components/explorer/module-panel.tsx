@@ -24,6 +24,7 @@ export type ModulePanelData = {
   selected: boolean;
   dimmed: boolean;
   activeFiles: ReadonlySet<string> | null;
+  activeCategoryId: string | null;
   selectedFile: string | null;
   onClose: (nodeId: string) => void;
   onSelectFile: (nodeId: string, filePath: string) => void;
@@ -102,6 +103,9 @@ export function ModulePanel({
         <span className="mt-0.5 font-mono text-[9px] text-faint">
           {data.node.files.length} files · in {data.node.fanIn} · out{" "}
           {data.node.fanOut}
+          {data.activeCategoryId
+            ? ` · ${data.node.files.filter((file) => file.categoryId === data.activeCategoryId).length} matched`
+            : ""}
         </span>
       </button>
 
